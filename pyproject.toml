@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "bs4>=0.0.2",
+    "langchain>=0.3.23",
+    "langchain-community>=0.3.21",
+    "langchain-huggingface>=0.1.2",
     "matplotlib>=3.10.1",
     "pandas>=2.2.3",
     "requests>=2.32.3",
