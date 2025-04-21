@@ -1,0 +1,45 @@
+header {
+    background: #172A3F !important;
+    color: white;
+    padding-left: 1em;
+    padding-top: 4px;
+}
+
+header div[data-testid="stDecoration"] {
+    display: none;
+}
+
+header::before {
+    content: "";
+    background-image: url(/app/static/img/logo.png);
+    background-size: 100% 100%;
+    display: inline-block;
+    width: 114px;
+    height: 40px;
+}
+
+.stMarkdown div[data-testid="stMarkdownContainer"] {
+    border-radius: 8px;
+}
+
+div[data-testid="stMarkdownContainer"]:first {
+    display: none;
+}
+
+div[data-testid="stForm"] {
+    background: white;
+    margin-top: 2em;
+}
+
+.stChatInputContainer, .stChatMessage {
+    background-color: white;
+}
+
+.stChatMessage {
+    padding-right: 1rem;
+}
+
+/* Hide the sidebar and the hamburger menu */
+[data-testid="stSidebar"], [data-testid="collapsedControl"] {
+    display: none
+}
