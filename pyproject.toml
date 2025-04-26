@@ -13,6 +13,7 @@ dependencies = [
     "matplotlib>=3.10.1",
     "notebook>=7.4.0",
     "numpy>=2.2.4",
+    "ollama>=0.4.8",
     "pandas>=2.2.3",
     "requests>=2.32.3",
     "seaborn>=0.13.2",
