@@ -1,14 +1,31 @@
-name: Backup Diario
+name: Backup Diario a Google Drive
 
 on:
   schedule:
     - cron: '0 2 * * *'  # Todos los días a las 2:00 AM UTC
-  workflow_dispatch:      # Permite ejecutarlo manualmente también
+  workflow_dispatch:      # Permite ejecutar manualmente
 
 jobs:
   backup:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Llamar a endpoint de backup
-        run: curl -X POST "${{ secrets.BACKUP_URL }}"
+      - name: Instalar rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: Crear archivo de configuración de rclone
+        run: |
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
+
+      - name: Crear archivo de backup
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          echo "Backup generado el $DATE" > backup-$DATE.txt
+
+      - name: Subir archivo a Google Drive
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          rclone copy backup-$DATE.txt "gdrive:{${{ secrets.GDRIVE_FOLDER_ID }}}"
+
