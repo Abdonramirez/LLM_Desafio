@@ -1,0 +1,14 @@
+name: Backup Diario
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Todos los días a las 2:00 AM UTC
+  workflow_dispatch:      # Permite ejecutarlo manualmente también
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Llamar a endpoint de backup
+        run: curl -X POST "${{ secrets.BACKUP_URL }}"
