@@ -1,0 +1,51 @@
+title = "Configuración personalizada para Gitleaks"
+
+[allowlist]
+description = "Excluir rutas de archivos seguras o necesarias"
+files = [
+  ".*\\.md",              # Permitir archivos Markdown (README, docs)
+  ".*\\.test\\.js",       # Permitir archivos de test
+  ".*\\.test\\.ts",       
+]
+paths = [
+  "public/.*",            # Permitir rutas públicas (como assets)
+]
+
+[[rules]]
+description = "Detectar claves API genéricas"
+regex = '''(?i)(api[_-]?key|access[_-]?token|auth[_-]?token)["'\s:=]+[0-9a-zA-Z\-_.]{16,}'''
+tags = ["apikey", "token"]
+
+[[rules]]
+description = "Detectar claves secretas de AWS"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws", "key", "cloud"]
+
+[[rules]]
+description = "Detectar claves privadas (SSH, RSA)"
+regex = '''-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY-----'''
+tags = ["key", "ssh", "private"]
+
+[[rules]]
+description = "Detectar contraseñas hardcodeadas"
+regex = '''(?i)(password|pwd|pass)["'\s:=]+.{6,}'''
+tags = ["password", "credential"]
+
+[[rules]]
+description = "Detectar secretos en variables de entorno (.env)"
+regex = '''(?i)(secret|token|key|password|pwd)["'\s:=]+[0-9a-zA-Z\-_.]{8,}'''
+tags = ["env", "config", "secrets"]
+
+[[rules]]
+description = "Detectar tokens de Telegram Bot"
+regex = '''\d{9}:[0-9A-Za-z_-]{35}'''
+tags = ["telegram", "bot"]
+
+[[rules]]
+description = "Detectar tokens de Stripe"
+regex = '''(sk_live|rk_live)_[0-9a-zA-Z]{24}'''
+tags = ["stripe", "payment"]
+
+[entropy]
+enable = true
+threshold = 4.5
