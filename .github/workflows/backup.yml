@@ -1,0 +1,33 @@
+name: Backup a Google Drive
+
+on:
+  # Ejecutar el backup cuando se haga push en main o manualmente
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Checkout del código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Paso 2: Instalar rclone
+      - name: Instalar rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      # Paso 3: Configurar rclone usando secrets
+      - name: Configurar rclone
+        run: |
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
+
+      # Paso 4: Hacer backup usando rclone
+      - name: Realizar backup en Google Drive
+        run: |
+          rclone copy ./ gdrive:/Backups/ --verbose
