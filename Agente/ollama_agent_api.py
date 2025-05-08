@@ -3,22 +3,22 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from ollama_agent import rag_agent
-# ========== FASTAPI INIT ==========
+# FASTAPI
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Cambiar en producción
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ========== MODELO ENTRADA ==========
+# MODELO ENTRADA
 class ChatInput(BaseModel):
     question: str
 
-# ========== ENDPOINT ==========
+# ENDPOINT
 @app.post("/chat")
 def chat(query: ChatInput):
     try:
