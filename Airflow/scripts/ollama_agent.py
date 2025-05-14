@@ -11,7 +11,7 @@ from typing import TypedDict, List
 from langchain_community.llms import Ollama
 
 # Cargar el DataFrame
-df = pd.read_csv("Articulos_LLM6.csv").drop_duplicates()
+df = pd.read_csv("Airflow/scripts/data/Articulos_limpios.csv").drop_duplicates()
 
 # Crear documentos con metadatos
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")

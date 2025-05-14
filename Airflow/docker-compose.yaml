@@ -22,6 +22,7 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
     volumes:
       - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
       - ./scripts:/opt/airflow/scripts
       - ./faiss_index:/opt/airflow/faiss_index
     ports:
@@ -39,9 +40,22 @@ services:
       AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./data:/opt/airflow/data
+      - ./scripts:/opt/airflow/scripts
       - ./faiss_index:/opt/airflow/faiss_index
     command: scheduler
 
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: ollama_chatbot_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./faiss_index:/app/faiss_index
+      - ./scripts:/app/scripts
+    command: uvicorn scripts.ollama_agent_api:app --host 0.0.0.0 --port 8000 --reload
+
 volumes:
   postgres_data:
+

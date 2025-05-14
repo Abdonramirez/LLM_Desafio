@@ -1,0 +1,12 @@
+# Dockerfile.fastapi
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY scripts/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+COPY scripts/ /app/scripts/
+COPY faiss_index/ /app/faiss_index/
+
+CMD ["uvicorn", "airflow.ollama_agent_api:app", "--host", "0.0.0.0", "--port", "8000"]
