@@ -2,7 +2,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from Airflow.data.ollama_agent import rag_agent
+from scripts.ollama_agent import rag_agent
+
 # FASTAPI
 app = FastAPI()
 
