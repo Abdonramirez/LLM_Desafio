@@ -35,6 +35,13 @@ def get_request_with_retries(url: str, retries: int = 3, timeout: int = 20) -> r
     return None
 
 def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame:
+    import os
+    import time
+    import random
+    import pandas as pd
+    import requests
+    from bs4 import BeautifulSoup
+
     articulos = []
     urls_por_ciudad = {ciudad: set() for ciudad in CIUDADES}
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -42,8 +49,8 @@ def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame
     for ciudad in CIUDADES:
         for seccion in SECCIONES:
             print(f"\n🔎 Visitando ciudad: {ciudad.upper()} - sección: {seccion.upper()}")
-            pagina = 1
             url = f'https://quehacerconlosninos.es/{ciudad}/{seccion}/'
+
             try:
                 res = requests.get(url, headers=HEADERS, timeout=10)
                 if res.status_code != 200:
@@ -59,6 +66,7 @@ def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame
                 for t in titulos:
                     titulo = t.get_text(strip=True)
                     link = t.find('a')['href']
+
                     if link in urls_por_ciudad[ciudad]:
                         print(f"⏭️ Ya extraído en {ciudad}: {link}")
                         continue
@@ -89,11 +97,17 @@ def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame
                     })
                     urls_por_ciudad[ciudad].add(link)
                     print(f"✅ Extraído: {titulo}")
-                    time.sleep(random.uniform(1.0, 2.0))
+                    time.sleep(random.uniform(0.5, 1.2))  # más rápido en modo pruebas
 
             except Exception as e:
                 print(f"❌ Error accediendo a {url}: {e}")
                 continue
+
+    df = pd.DataFrame(articulos)
+    df.to_csv(output_path, index=False)
+    print(f"\n📝 CSV guardado en: {output_path} ({len(df)} registros)")
+    return df
+
 
     df = pd.DataFrame(articulos)
     df.to_csv(output_path, index=False)
