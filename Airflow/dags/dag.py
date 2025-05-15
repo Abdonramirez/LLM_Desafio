@@ -51,8 +51,10 @@ end = DummyOperator(task_id='end', dag=dag)
 scrape_data_task = PythonOperator(
     task_id='scrape_data',
     python_callable=run_scraping,
+    execution_timeout=timedelta(minutes=60),
     dag=dag,
 )
+
 
 generate_embeddings_task = PythonOperator(
     task_id='generate_embeddings',
