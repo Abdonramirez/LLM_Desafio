@@ -4,6 +4,8 @@ FROM python:3.10-slim
 WORKDIR /app
 
 ENV PYTHONPATH="${PYTHONPATH}:/app/scripts"
+ENV PYTHONWARNINGS="ignore::SyntaxWarning"
+
 
 COPY requirements_fastapi.txt /app/requirements_fastapi.txt
 RUN pip install --no-cache-dir -r /app/requirements_fastapi.txt
