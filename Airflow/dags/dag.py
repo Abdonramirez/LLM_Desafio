@@ -32,14 +32,8 @@ dag = DAG(
 )
 
 def run_scraping():
-    try:
-        subprocess.run([
-            "jupyter", "nbconvert", "--to", "notebook",
-            "--execute", "--inplace", SCRAPING_SCRIPT
-        ], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error ejecutando Webscraping: {e}")
-        raise
+    path = os.path.join(SCRIPTS_PATH, "Webscraping.py")
+    subprocess.run(["python", path], check=True)
 
 def run_embedding():
     try:
