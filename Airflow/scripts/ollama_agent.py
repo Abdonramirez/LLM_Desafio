@@ -63,6 +63,19 @@ else:
     vectorstore.save_local("faiss_index")
     print("✅ Vectorstore guardado en disco.")
 
+vectorstore = None
+
+def load_vectorstore(force_reload=False):
+    global vectorstore
+    if vectorstore is None or force_reload:
+        print("🔁 Cargando vectorstore desde disco...")
+        vectorstore = FAISS.load_local(
+            "faiss_index",
+            HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2"),
+            allow_dangerous_deserialization=True
+        )
+    return vectorstore
+
 # 1. Configura tu modelo local con Ollama
 llm = Ollama(model="mistral", base_url="http://ollama:11434")
 

@@ -1,30 +1,28 @@
-
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from scripts.ollama_agent import rag_agent
+from scripts.ollama_agent import rag_agent, load_vectorstore
+import uvicorn
 
-# FASTAPI
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/")
+def root():
+    return {"message": "API del agente RAG funcionando."}
 
-# MODELO ENTRADA
-class ChatInput(BaseModel):
-    question: str
-
-# ENDPOINT
 @app.post("/chat")
-def chat(query: ChatInput):
+def chat(prompt: str):
     try:
-        state = {"query": query.question}
-        result = rag_agent.invoke(state)
-        return {"response": result["generation"]}
+        return {"response": rag_agent.invoke(prompt)["answer"]}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error en el agente: {str(e)}")
+
+@app.post("/reload_vectorstore")
+def reload_vectorstore():
+    try:
+        print("🔄 Recargando vectorstore...")
+        load_vectorstore(force_reload=True)
+        return {"message": "Vectorstore recargado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al recargar vectorstore: {str(e)}")    
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
