@@ -42,6 +42,11 @@ services:
       - ./faiss_index:/opt/airflow/faiss_index
     command: scheduler
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+
   fastapi:
     build:
       context: .

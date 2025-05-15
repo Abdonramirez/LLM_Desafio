@@ -64,7 +64,7 @@ else:
     print("✅ Vectorstore guardado en disco.")
 
 # 1. Configura tu modelo local con Ollama
-llm = Ollama(model="mistral")
+llm = Ollama(model="mistral", base_url="http://ollama:11434")
 
 class AgentState(TypedDict):
     query: str
