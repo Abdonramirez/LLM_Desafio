@@ -2,10 +2,9 @@ FROM apache/airflow:2.9.0
 
 USER root
 
-# Instala librerías necesarias
+# Instala librerías necesarias (si realmente las necesitas)
 RUN apt-get update && apt-get install -y \
     git \
-    python3-pip \
     build-essential \
     curl \
     libglib2.0-0 \
@@ -14,8 +13,11 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Instala Jupyter y dependencias de scraping/vectorstore
+# Copia el requirements.txt
 COPY requirements.txt /requirements.txt
-RUN pip install --no-cache-dir -r /requirements.txt
 
+# ⚠ Cambiar a usuario 'airflow' antes de instalar
 USER airflow
+
+# Instala los paquetes Python como usuario permitido
+RUN pip install --no-cache-dir -r /requirements.txt
