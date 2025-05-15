@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copia el requirements.txt
-COPY requirements.txt /requirements.txt
+COPY requirements.txt /requirements_airflow.txt
 
 # ⚠ Cambiar a usuario 'airflow' antes de instalar
 USER airflow
