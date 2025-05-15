@@ -36,9 +36,20 @@ def run_scraping():
     subprocess.run(["python", path], check=True)
 
 def run_embedding():
+    import os
+    import subprocess
+
+    DATA_PATH = "scripts/data/Articulos_limpios.csv"
+    INDEX_PATH = "faiss_index"
+
     try:
+        if not os.path.exists(DATA_PATH):
+            raise FileNotFoundError(f"❌ No se encontró el archivo CSV en: {DATA_PATH}")
+
         if not os.path.exists(INDEX_PATH) or os.path.getmtime(DATA_PATH) > os.path.getmtime(INDEX_PATH):
-            subprocess.run(["python", EMBEDDING_SCRIPT], check=True)
+            print("🔁 Ejecutando embedding.py para generar nuevo vectorstore...")
+            subprocess.run(["python", "scripts/embedding.py"], check=True)
+            print("✅ Vectorstore actualizado.")
         else:
             print("ℹ️ Vectorstore ya actualizado, se omite regeneración.")
     except Exception as e:
