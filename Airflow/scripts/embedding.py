@@ -4,7 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain.schema import Document
 
-df = pd.read_csv("Airflow/scripts/data/Articulos_limpios.csv")
+df = pd.read_csv("scripts/data/Articulos_limpios.csv")
 df = df.drop_duplicates()
 
 docs = [
