@@ -20,4 +20,4 @@ COPY requirements.txt /requirements_airflow.txt
 USER airflow
 
 # Instala los paquetes Python como usuario permitido
-RUN pip install --no-cache-dir -r /requirements.txt
+RUN pip install --no-cache-dir -r /requirements_airflow.txt
