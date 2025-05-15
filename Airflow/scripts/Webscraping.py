@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 
-def run_scraper(output_path: str = 'Airflow/scripts/data/Articulos.csv') -> pd.DataFrame:
+def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame:
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
     }
@@ -163,7 +163,7 @@ def extraer_ciudad(texto):
     return coincidencias[0].capitalize() if coincidencias else None
 
 # Función principal
-def procesar_articulos(input_path: str = 'Airflow/scripts/data/Articulos.csv', output_path: str = 'Airflow/scripts/data/Articulos_limpios.csv') -> pd.DataFrame:
+def procesar_articulos(input_path: str = 'scripts/data/Articulos.csv', output_path: str = 'scripts/data/Articulos_limpios.csv') -> pd.DataFrame:
     df = pd.read_csv(input_path)
 
     # Corrección de texto
@@ -195,8 +195,8 @@ def procesar_articulos(input_path: str = 'Airflow/scripts/data/Articulos.csv', o
 if __name__ == "__main__":
     run_scraper()
     procesar_articulos(
-        input_path='Airflow/scripts/data/Articulos.csv',
-        output_path='Airflow/scripts/data/Articulos_limopios.csv'  # Usa el nombre estándar que espera el resto del flujo
+        input_path='scripts/data/Articulos.csv',
+        output_path='scripts/data/Articulos_limpios.csv'  # Usa el nombre estándar que espera el resto del flujo
     )
 
 
