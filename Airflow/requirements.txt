@@ -4,7 +4,6 @@ faiss-cpu>=1.10.0
 fastapi>=0.115.12
 langchain>=0.3.23
 langchain-community>=0.3.21
-langchain-huggingface>=0.1.2
 notebook>=7.4.0
 numpy>=2.2.4
 ollama>=0.4.8
