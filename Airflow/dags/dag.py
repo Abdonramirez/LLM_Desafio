@@ -2,12 +2,17 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
-from datetime import timedelta, datetime
+from datetime import timedelta
 import subprocess
-import os 
+import os
 
+# Definir rutas
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_PATH = os.path.join(SCRIPT_DIR, "../scripts")
+DATA_PATH = os.path.join(SCRIPT_DIR, "../data/Articulos_limpios.csv")
+INDEX_PATH = os.path.join(SCRIPT_DIR, "../faiss_index")
+EMBEDDING_SCRIPT = os.path.join(SCRIPTS_PATH, "embedding.py")
+SCRAPING_SCRIPT = os.path.join(SCRIPTS_PATH, "Webscraping.py")
 
 default_args = {
     'owner': 'airflow',
@@ -27,31 +32,27 @@ dag = DAG(
 )
 
 def run_scraping():
-    path = os.path.join(SCRIPTS_PATH, "webscrapping.ipynb")
-    subprocess.run(["jupyter", "nbconvert", "--to", "notebook", "--execute", "--inplace", path], check=True)
+    try:
+        subprocess.run([
+            "jupyter", "nbconvert", "--to", "notebook",
+            "--execute", "--inplace", SCRAPING_SCRIPT
+        ], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error ejecutando Webscraping: {e}")
+        raise
 
 def run_embedding():
-    import os
-    if not os.path.exists("faiss_index") or os.path.getmtime("data/Articulos_LLM6.csv") > os.path.getmtime("faiss_index"):
-        subprocess.run(["python", "Airflow/scripts/embedding.py"], check=True)
-    else:
-        print("ℹ️ Vectorstore ya actualizado, se omite regeneración.")
-
-def restart_fastapi():
     try:
-        subprocess.run(["docker", "restart", "ollama_agent_api"], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error reiniciando API: {e}")
+        if not os.path.exists(INDEX_PATH) or os.path.getmtime(DATA_PATH) > os.path.getmtime(INDEX_PATH):
+            subprocess.run(["python", EMBEDDING_SCRIPT], check=True)
+        else:
+            print("ℹ️ Vectorstore ya actualizado, se omite regeneración.")
+    except Exception as e:
+        print(f"❌ Error en embedding: {e}")
         raise
 
 start = DummyOperator(task_id='start', dag=dag)
 end = DummyOperator(task_id='end', dag=dag)
-
-restart_task = PythonOperator(
-    task_id="restart_chatbot_api",
-    python_callable=restart_fastapi,
-    dag=dag,
-)
 
 scrape_data_task = PythonOperator(
     task_id='scrape_data',
@@ -65,6 +66,5 @@ generate_embeddings_task = PythonOperator(
     dag=dag,
 )
 
-# Puedes agregar una notificación o reinicio de API aquí si es necesario
-
-start >> scrape_data_task >> generate_embeddings_task >> restart_task >> end
+# Define flujo del DAG
+start >> scrape_data_task >> generate_embeddings_task >> end
