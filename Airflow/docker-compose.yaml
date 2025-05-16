@@ -21,7 +21,6 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: my_super_secure_key_123!
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./data:/opt/airflow/data
       - ./scripts:/opt/airflow/scripts
       - ./faiss_index:/opt/airflow/faiss_index
     ports:

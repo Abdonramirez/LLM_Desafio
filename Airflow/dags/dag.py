@@ -6,14 +6,20 @@ from datetime import timedelta
 import subprocess
 import os
 
-# Definir rutas
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SCRIPTS_PATH = os.path.join(SCRIPT_DIR, "../scripts")
-DATA_PATH = os.path.join(SCRIPT_DIR, "../data/Articulos_limpios.csv")
-INDEX_PATH = os.path.join(SCRIPT_DIR, "../faiss_index")
-EMBEDDING_SCRIPT = os.path.join(SCRIPTS_PATH, "embedding.py")
-SCRAPING_SCRIPT = os.path.join(SCRIPTS_PATH, "Webscraping.py")
+# ----------------------
+# Definir rutas absolutas
+# ----------------------
+DAG_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(DAG_DIR, os.pardir))
+SCRIPTS_DIR = os.path.join(BASE_DIR, 'scripts')
+DATA_PATH = os.path.join(SCRIPTS_DIR, 'data', 'Articulos_limpios.csv')
+INDEX_PATH = os.path.join(BASE_DIR, 'faiss_index')
+SCRAPING_SCRIPT = os.path.join(SCRIPTS_DIR, 'Webscraping.py')
+EMBEDDING_SCRIPT = os.path.join(SCRIPTS_DIR, 'embedding.py')
 
+# ----------------------
+# Configuración del DAG
+# ----------------------
 default_args = {
     'owner': 'airflow',
     'email_on_failure': False,
@@ -25,36 +31,37 @@ dag = DAG(
     'update_vectorstore_for_chatbot',
     default_args=default_args,
     description='Scrape, embed and update vectorstore for chatbot daily',
-    schedule_interval='@daily',  # o '0 6 * * *' para 6 am
+    schedule_interval='@daily',
     start_date=days_ago(1),
     catchup=False,
     tags=['webscraping', 'chatbot', 'embeddings'],
 )
 
+# ----------------------
+# Funciones de tareas
+# ----------------------
+
 def run_scraping():
-    path = os.path.join(SCRIPTS_PATH, "Webscraping.py")
-    subprocess.run(["python", path], check=True)
+    print(f"🚀 Ejecutando scraping desde: {SCRAPING_SCRIPT}")
+    subprocess.run(["python", SCRAPING_SCRIPT], check=True)
+    print("✅ Webscraping finalizado")
 
 def run_embedding():
-    import os
-    import subprocess
+    print(f"📂 Verificando existencia del CSV en: {DATA_PATH}")
+    if not os.path.exists(DATA_PATH):
+        raise FileNotFoundError(f"❌ CSV no encontrado: {DATA_PATH}")
 
-    DATA_PATH = "scripts/data/Articulos_limpios.csv"
-    INDEX_PATH = "faiss_index"
+    print(f"📦 Verificando índice FAISS en: {INDEX_PATH}")
+    if not os.path.exists(INDEX_PATH) or os.path.getmtime(DATA_PATH) > os.path.getmtime(INDEX_PATH):
+        print("🔁 Ejecutando embedding.py para actualizar vectorstore...")
+        subprocess.run(["python", EMBEDDING_SCRIPT], check=True)
+        print("✅ Vectorstore actualizado")
+    else:
+        print("ℹ️ Vectorstore ya está actualizado. No es necesario regenerar.")
 
-    try:
-        if not os.path.exists(DATA_PATH):
-            raise FileNotFoundError(f"❌ No se encontró el archivo CSV en: {DATA_PATH}")
-
-        if not os.path.exists(INDEX_PATH) or os.path.getmtime(DATA_PATH) > os.path.getmtime(INDEX_PATH):
-            print("🔁 Ejecutando embedding.py para generar nuevo vectorstore...")
-            subprocess.run(["python", "scripts/embedding.py"], check=True)
-            print("✅ Vectorstore actualizado.")
-        else:
-            print("ℹ️ Vectorstore ya actualizado, se omite regeneración.")
-    except Exception as e:
-        print(f"❌ Error en embedding: {e}")
-        raise
+# ----------------------
+# Definición de tareas
+# ----------------------
 
 start = DummyOperator(task_id='start', dag=dag)
 end = DummyOperator(task_id='end', dag=dag)
@@ -62,16 +69,18 @@ end = DummyOperator(task_id='end', dag=dag)
 scrape_data_task = PythonOperator(
     task_id='scrape_data',
     python_callable=run_scraping,
-    execution_timeout=timedelta(minutes=60),
+    execution_timeout=timedelta(minutes=90),  # dale más tiempo
     dag=dag,
 )
-
 
 generate_embeddings_task = PythonOperator(
     task_id='generate_embeddings',
     python_callable=run_embedding,
+    execution_timeout=timedelta(minutes=15),
     dag=dag,
 )
 
-# Define flujo del DAG
+# ----------------------
+# Flujo del DAG
+# ----------------------
 start >> scrape_data_task >> generate_embeddings_task >> end
