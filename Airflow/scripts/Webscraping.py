@@ -35,73 +35,66 @@ def get_request_with_retries(url: str, retries: int = 3, timeout: int = 20) -> r
     return None
 
 def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame:
-    import os
-    import time
-    import random
-    import pandas as pd
-    import requests
-    from bs4 import BeautifulSoup
-
     articulos = []
-    urls_por_ciudad = {ciudad: set() for ciudad in CIUDADES}
+    urls_por_ciudad = {"madrid": set()}  # Solo Madrid
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    for ciudad in CIUDADES:
-        for seccion in SECCIONES:
-            print(f"\n🔎 Visitando ciudad: {ciudad.upper()} - sección: {seccion.upper()}")
-            url = f'https://quehacerconlosninos.es/{ciudad}/{seccion}/'
+    ciudad = "madrid"
+    for seccion in SECCIONES:
+        print(f"\n🔎 Visitando ciudad: {ciudad.upper()} - sección: {seccion.upper()}")
+        url = f'https://quehacerconlosninos.es/{ciudad}/{seccion}/'
 
-            try:
-                res = requests.get(url, headers=HEADERS, timeout=10)
-                if res.status_code != 200:
-                    print(f'❌ No se pudo acceder a {url}')
-                    continue
-
-                soup = BeautifulSoup(res.text, 'html.parser')
-                titulos = soup.find_all('h3', class_='elementor-post__title')
-                if not titulos:
-                    print(f"⚠️ No hay artículos en {ciudad}/{seccion}")
-                    continue
-
-                for t in titulos:
-                    titulo = t.get_text(strip=True)
-                    link = t.find('a')['href']
-
-                    if link in urls_por_ciudad[ciudad]:
-                        print(f"⏭️ Ya extraído en {ciudad}: {link}")
-                        continue
-
-                    res_art = get_request_with_retries(link)
-                    if not res_art:
-                        print(f"❌ Fallo en los reintentos para: {link}")
-                        continue
-
-                    soup_art = BeautifulSoup(res_art.text, 'html.parser')
-                    content = soup_art.find('div', class_='elementor-widget-theme-post-content')
-                    if not content:
-                        print(f"⚠️ No se encontró contenido en: {link}")
-                        continue
-
-                    parrafos = content.find_all('p')
-                    texto = " ".join(p.get_text(strip=True) for p in parrafos).strip()
-                    if not texto:
-                        print(f"⚠️ Contenido vacío: {titulo}")
-                        continue
-
-                    articulos.append({
-                        'ciudad': ciudad,
-                        'seccion': seccion,
-                        'titulo': titulo,
-                        'url': link,
-                        'contenido': texto
-                    })
-                    urls_por_ciudad[ciudad].add(link)
-                    print(f"✅ Extraído: {titulo}")
-                    time.sleep(random.uniform(0.5, 1.2))  # más rápido en modo pruebas
-
-            except Exception as e:
-                print(f"❌ Error accediendo a {url}: {e}")
+        try:
+            res = requests.get(url, headers=HEADERS, timeout=10)
+            if res.status_code != 200:
+                print(f'❌ No se pudo acceder a {url}')
                 continue
+
+            soup = BeautifulSoup(res.text, 'html.parser')
+            titulos = soup.find_all('h3', class_='elementor-post__title')
+            if not titulos:
+                print(f"⚠️ No hay artículos en {ciudad}/{seccion}")
+                continue
+
+            for t in titulos:
+                titulo = t.get_text(strip=True)
+                link = t.find('a')['href']
+
+                if link in urls_por_ciudad[ciudad]:
+                    print(f"⏭️ Ya extraído en {ciudad}: {link}")
+                    continue
+
+                res_art = get_request_with_retries(link)
+                if not res_art:
+                    print(f"❌ Fallo en los reintentos para: {link}")
+                    continue
+
+                soup_art = BeautifulSoup(res_art.text, 'html.parser')
+                content = soup_art.find('div', class_='elementor-widget-theme-post-content')
+                if not content:
+                    print(f"⚠️ No se encontró contenido en: {link}")
+                    continue
+
+                parrafos = content.find_all('p')
+                texto = " ".join(p.get_text(strip=True) for p in parrafos).strip()
+                if not texto:
+                    print(f"⚠️ Contenido vacío: {titulo}")
+                    continue
+
+                articulos.append({
+                    'ciudad': ciudad,
+                    'seccion': seccion,
+                    'titulo': titulo,
+                    'url': link,
+                    'contenido': texto
+                })
+                urls_por_ciudad[ciudad].add(link)
+                print(f"✅ Extraído: {titulo}")
+                time.sleep(random.uniform(0.4, 0.8))  # más rápido aún
+
+        except Exception as e:
+            print(f"❌ Error accediendo a {url}: {e}")
+            continue
 
     df = pd.DataFrame(articulos)
     df.to_csv(output_path, index=False)
