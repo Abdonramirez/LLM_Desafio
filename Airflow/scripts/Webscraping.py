@@ -108,12 +108,6 @@ def run_scraper(output_path: str = 'scripts/data/Articulos.csv') -> pd.DataFrame
     print(f"\n📝 CSV guardado en: {output_path} ({len(df)} registros)")
     return df
 
-
-    df = pd.DataFrame(articulos)
-    df.to_csv(output_path, index=False)
-    print(f"📝 CSV guardado en: {output_path} ({len(df)} registros)")
-    return df
-
 # Funciones de procesamiento
 def corregir_texto(texto):
     texto = re.sub(r'([a-zA-Z])(\d)', r'\1 \2', texto)
