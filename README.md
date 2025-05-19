@@ -38,9 +38,9 @@ Extraer automáticamente información de artículos del sitio web, procesarla me
 
 ## 📁 Estructura del Proyecto
 
-| Carpeta / Archivo                | Descripción                                                                                                                                                          |
+| Carpeta                | Descripción                                                                                                                                                          |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Agente/**                      | Código del agente conversacional implementado con **Telegram** y **Ollama** (modelo LLaMA 3). Maneja el flujo de interacción con el usuario.                         |
+| **Agente/**                      | Código del agente conversacional implementado con **Telegram** y **Ollama** (modelo Mistral). Maneja el flujo de interacción con el usuario.                         |
 | **Airflow/**                     | DAGs y scripts del pipeline automatizado con **Apache Airflow**: scraping, embeddings y actualización diaria. Configurado con **Docker** para producción en la nube. |
 | **data/**                        | Contiene los datos estructurados del scraping y la base de datos de conversaciones del agente.                                                                       |
 | **static/**                      | Recursos estáticos del proyecto (imágenes, archivos auxiliares, etc.).                                                                                               |
