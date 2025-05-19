@@ -61,7 +61,6 @@ else:
     vectorstore.save_local("faiss_index")
     print("✅ Vectorstore guardado en disco.")
 
-vectorstore = None
 
 def load_vectorstore(force_reload=False):
     global vectorstore
@@ -166,9 +165,14 @@ def generate(state):
     prompt = f"""
 Fecha actual: {fecha_actual}
 
-Responde de forma clara, breve y profesional a la pregunta del usuario utilizando solamente la información proporcionada en el contexto. 
-Escribe una respuesta en forma de párrafo basada solo en el contexto anterior. Al final de la respuesta, agrega una lista de hasta 3 enlaces relevantes extraídos del contexto.
-No inventes actividades, lugares ni enlaces. Si hay poca información, da una recomendación general y sugiere consultar los enlaces reales al final.
+Responde de forma clara, breve y profesional a la siguiente pregunta del usuario, utilizando **exclusivamente** la información contenida en el contexto.
+No inventes actividades, lugares ni enlaces. Si no hay suficiente información, simplemente responde "No hay actividades disponibles" o algo equivalente.
+
+Al final, si hay URLs reales en el contexto, agrega una lista de hasta 3 enlaces en formato:
+- Título
+  URL
+
+Si hay menos de 3 enlaces, usa solo los disponibles. **No te inventes otros.** 
 
 Contexto:
 \"\"\"
@@ -199,7 +203,7 @@ Respuesta:
         links_texto = ""
 
     return {
-        "generation": f"{respuesta.strip()}{links_texto}"
+        "generation": f"{respuesta.strip()}{links_texto}".replace("\n", " ")
     }
 
 graph = StateGraph(AgentState)
