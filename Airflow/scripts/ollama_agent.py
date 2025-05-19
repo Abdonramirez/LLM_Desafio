@@ -16,7 +16,6 @@ df = pd.read_csv("scripts/data/Articulos_limpios.csv").drop_duplicates()
 # Crear documentos con metadatos
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# Primero: ¿ya existe el vectorstore?
 if os.path.exists("faiss_index"):
     print("🔁 Cargando vectorstore desde disco...")
     vectorstore = FAISS.load_local("faiss_index", embedding_model, allow_dangerous_deserialization=True)
@@ -26,7 +25,6 @@ else:
 
     df = pd.read_csv("Articulos_LLM6.csv").drop_duplicates()
 
-    # Crear documentos
     docs = [
         Document(
             page_content=row["contenido"],
@@ -76,7 +74,6 @@ def load_vectorstore(force_reload=False):
         )
     return vectorstore
 
-# 1. Configura tu modelo local con Ollama
 llm = Ollama(model="mistral", base_url="http://ollama:11434")
 
 class AgentState(TypedDict):
@@ -160,7 +157,6 @@ def generate(state):
 
     fecha_actual = datetime.now().strftime("%A, %d de %B de %Y")
 
-    # Construir contexto claro y útil
     context = "\n\n".join(
         f"{doc.page_content}\nFuente: {doc.metadata.get('url', '')}"
         for doc in docs[:5]

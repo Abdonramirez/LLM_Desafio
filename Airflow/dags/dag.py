@@ -6,9 +6,6 @@ from datetime import timedelta
 import subprocess
 import os
 
-# ----------------------
-# Definir rutas absolutas
-# ----------------------
 DAG_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(DAG_DIR, os.pardir))
 SCRIPTS_DIR = os.path.join(BASE_DIR, 'scripts')
@@ -17,9 +14,6 @@ INDEX_PATH = os.path.join(BASE_DIR, 'faiss_index')
 SCRAPING_SCRIPT = os.path.join(SCRIPTS_DIR, 'Webscraping.py')
 EMBEDDING_SCRIPT = os.path.join(SCRIPTS_DIR, 'embedding.py')
 
-# ----------------------
-# Configuración del DAG
-# ----------------------
 default_args = {
     'owner': 'airflow',
     'email_on_failure': False,
@@ -36,10 +30,6 @@ dag = DAG(
     catchup=False,
     tags=['webscraping', 'chatbot', 'embeddings'],
 )
-
-# ----------------------
-# Funciones de tareas
-# ----------------------
 
 def run_scraping():
     print(f"🚀 Ejecutando scraping desde: {SCRAPING_SCRIPT}")
@@ -59,17 +49,13 @@ def run_embedding():
     else:
         print("ℹ️ Vectorstore ya está actualizado. No es necesario regenerar.")
 
-# ----------------------
-# Definición de tareas
-# ----------------------
-
 start = DummyOperator(task_id='start', dag=dag)
 end = DummyOperator(task_id='end', dag=dag)
 
 scrape_data_task = PythonOperator(
     task_id='scrape_data',
     python_callable=run_scraping,
-    execution_timeout=timedelta(minutes=90),  # dale más tiempo
+    execution_timeout=timedelta(minutes=90),
     dag=dag,
 )
 
@@ -80,7 +66,4 @@ generate_embeddings_task = PythonOperator(
     dag=dag,
 )
 
-# ----------------------
-# Flujo del DAG
-# ----------------------
 start >> scrape_data_task >> generate_embeddings_task >> end
